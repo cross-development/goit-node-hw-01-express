@@ -1,4 +1,3 @@
-//Core
-const express = require('express')
+const ContactsServer = require('./api/server');
 
-const app = express()
+new ContactsServer().start();
