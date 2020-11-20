@@ -2,6 +2,8 @@
 const { Router } = require('express');
 //Controller
 const contactsController = require('./contacts.controller');
+//Middleware
+const contactsMiddleware = require('./contacts.middleware');
 
 //Init router
 const contactRouter = Router();
@@ -13,7 +15,7 @@ contactRouter.get('/', contactsController.listContacts);
 contactRouter.get('/:contactId', contactsController.getContactById);
 
 // @ POST /api/contacts
-contactRouter.post('/', contactsController.addContact);
+contactRouter.post('/', contactsMiddleware.validateCreateContact, contactsController.addContact);
 
 // @ DELETE /api/contacts/:contactId
 contactRouter.delete('/:contactId', contactsController.removeContact);

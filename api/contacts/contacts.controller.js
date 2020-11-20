@@ -1,8 +1,8 @@
 //Core
-const fsPromises = require('fs/promises');
 const path = require('path');
+const fsPromises = require('fs/promises');
 //Utils
-const { uuid } = require('uuidv4');
+const { v4: uuidv4 } = require('uuid');
 //Data path
 const contactsPath = path.join(__dirname, '../../db/contacts.json');
 
@@ -10,9 +10,10 @@ const contactsPath = path.join(__dirname, '../../db/contacts.json');
 async function listContacts(req, res, next) {
 	try {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
-		const parsedData = await JSON.parse(data);
 
-		return await res.json(parsedData);
+		const parsedData = JSON.parse(data);
+
+		return await res.status(200).send(parsedData);
 	} catch (error) {
 		console.error(error);
 	}
@@ -24,12 +25,12 @@ async function getContactById(req, res, next) {
 
 	try {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
-		const parsedData = await JSON.parse(data);
 
-		const contactById = await parsedData.find(({ id }) => id === contactId);
+		const parsedData = JSON.parse(data);
+		const contactById = parsedData.find(({ id }) => id === contactId);
 
 		contactById
-			? await res.json(contactById)
+			? await res.status(200).send(contactById)
 			: await res.status(404).send({ message: 'Not found' });
 	} catch (error) {
 		console.error(error);
@@ -38,19 +39,20 @@ async function getContactById(req, res, next) {
 
 //Create: received contact data and return created contact with id
 async function addContact(req, res, next) {
-	const { name, email, phone } = req.body;
-
 	try {
+		const newContact = {
+			id: uuidv4(),
+			...req.body,
+		};
+
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
-		const id = (await JSON.parse(data).length) + 1;
+		const parsedData = JSON.parse(data).concat(newContact);
+		const stringifyParsedData = JSON.stringify(parsedData, null, 2);
 
-		const rewroteContactList = await JSON.parse(data).concat({ id, name, email, phone });
-		const stringifiedRewroteList = JSON.stringify(rewroteContactList, null, 2);
+		await fsPromises.writeFile(contactsPath, stringifyParsedData, 'utf-8');
 
-		await fsPromises.writeFile(contactsPath, stringifiedRewroteList, 'utf-8');
-
-		console.log('The contact has been added!');
+		return await res.status(201).send(newContact);
 	} catch (error) {
 		console.error(error);
 	}
@@ -63,12 +65,20 @@ async function removeContact(req, res, next) {
 	try {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
-		const rewroteList = await JSON.parse(data).filter(({ id }) => id !== contactId);
-		const stringifyRewroteList = JSON.stringify(rewroteList, null, 2);
+		const parsedData = JSON.parse(data);
 
-		await fsPromises.writeFile(contactsPath, stringifyRewroteList, 'utf-8');
+		const existContactIdx = parsedData.findIndex(({ id }) => id === contactId);
 
-		console.log('The contact has been removed!');
+		if (existContactIdx === -1) {
+			return await res.status(404).send({ message: 'Not found' });
+		}
+
+		const updatedData = parsedData.filter(({ id }) => id !== contactId);
+		const stringifyParsedData = JSON.stringify(updatedData, null, 2);
+
+		await fsPromises.writeFile(contactsPath, stringifyParsedData, 'utf-8');
+
+		return await res.status(200).send({ message: 'contact deleted' });
 	} catch (error) {
 		console.error(error);
 	}
