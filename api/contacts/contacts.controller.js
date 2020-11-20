@@ -26,11 +26,10 @@ async function getContactById(req, res, next) {
 	try {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
-		const parsedData = JSON.parse(data);
-		const contactById = parsedData.find(({ id }) => id === contactId);
+		const existContact = JSON.parse(data).find(({ id }) => id === contactId);
 
-		contactById
-			? await res.status(200).send(contactById)
+		existContact
+			? await res.status(200).send(existContact)
 			: await res.status(404).send({ message: 'Not found' });
 	} catch (error) {
 		console.error(error);
@@ -66,7 +65,6 @@ async function removeContact(req, res, next) {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
 		const parsedData = JSON.parse(data);
-
 		const existContactIdx = parsedData.findIndex(({ id }) => id === contactId);
 
 		if (existContactIdx === -1) {
@@ -89,6 +87,25 @@ async function updateContact(req, res, next) {
 	const { contactId } = req.params;
 
 	try {
+		const data = await fsPromises.readFile(contactsPath, 'utf-8');
+
+		const parsedData = JSON.parse(data);
+		const existContactIdx = parsedData.findIndex(({ id }) => id === contactId);
+
+		if (existContactIdx === -1) {
+			return await res.status(404).send({ message: 'Not found' });
+		}
+
+		const updatedData = parsedData.map(contact =>
+			contact.id === contactId ? { ...contact, ...req.body } : contact,
+		);
+		const stringifyParsedData = JSON.stringify(updatedData, null, 2);
+
+		await fsPromises.writeFile(contactsPath, stringifyParsedData, 'utf-8');
+
+		const updatedContact = updatedData[existContactIdx];
+
+		return await res.status(200).send(updatedContact);
 	} catch (error) {
 		console.error(error);
 	}

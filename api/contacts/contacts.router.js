@@ -21,6 +21,10 @@ contactRouter.post('/', contactsMiddleware.validateCreateContact, contactsContro
 contactRouter.delete('/:contactId', contactsController.removeContact);
 
 // @ PATCH /api/contacts/:contactId
-contactRouter.patch('/:contactId', contactsController.updateContact);
+contactRouter.patch(
+	'/:contactId',
+	contactsMiddleware.validateUpdateContact,
+	contactsController.updateContact,
+);
 
 module.exports = contactRouter;

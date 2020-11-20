@@ -36,7 +36,7 @@ class ContactsServer {
 		this.server.use('/api/contacts', contactRouter);
 	}
 
-	//Start listening
+	//Start listening on port 2000
 	startListening() {
 		this.server.listen(process.env.PORT, () => {
 			console.log('Server started listening on port', process.env.PORT);
