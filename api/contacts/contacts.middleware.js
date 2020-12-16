@@ -1,7 +1,7 @@
 //Validation package
 const Joi = require('joi');
 
-//The middleware validate contact credential
+//The middleware validate contact credential (create)
 function validateCreateContact(req, res, next) {
 	const createContactRules = Joi.object({
 		name: Joi.string().required(),
@@ -18,6 +18,7 @@ function validateCreateContact(req, res, next) {
 	next();
 }
 
+//The middleware validate contact credential (update)
 function validateUpdateContact(req, res, next) {
 	const updateContactRules = Joi.object({
 		name: Joi.string(),

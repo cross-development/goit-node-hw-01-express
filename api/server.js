@@ -7,12 +7,12 @@ require('dotenv').config();
 const contactRouter = require('./contacts/contacts.router');
 
 class ContactsServer {
-	//Initial server state
+	//Initial server
 	constructor() {
 		this.server = null;
 	}
 
-	//Start the server
+	//Start server
 	start() {
 		this.initServer();
 		this.initMiddleware();

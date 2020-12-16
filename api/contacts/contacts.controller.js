@@ -36,7 +36,7 @@ async function getContactById(req, res, next) {
 	}
 }
 
-//Create: received contact data and return created contact with id
+//Create: receives contact data and return created contact with id
 async function addContact(req, res, next) {
 	try {
 		const newContact = {
@@ -65,9 +65,9 @@ async function removeContact(req, res, next) {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
 		const parsedData = JSON.parse(data);
-		const existContactIdx = parsedData.findIndex(({ id }) => id === contactId);
+		const existContact = parsedData.find(({ id }) => id === contactId);
 
-		if (existContactIdx === -1) {
+		if (!existContact) {
 			return await res.status(404).send({ message: 'Not found' });
 		}
 
@@ -84,11 +84,10 @@ async function removeContact(req, res, next) {
 
 //Update: update contact information by id
 async function updateContact(req, res, next) {
-	const { contactId } = req.params;
-
 	try {
 		const data = await fsPromises.readFile(contactsPath, 'utf-8');
 
+		const { contactId } = req.params;
 		const parsedData = JSON.parse(data);
 		const existContactIdx = parsedData.findIndex(({ id }) => id === contactId);
 
