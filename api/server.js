@@ -1,8 +1,8 @@
 //Core
 const express = require('express');
+const morgan = require('morgan');
 //Middleware
 const cors = require('cors');
-require('dotenv').config();
 //Routes
 const contactRouter = require('./contacts/contacts.router');
 
@@ -10,6 +10,7 @@ class ContactsServer {
 	//Initial server
 	constructor() {
 		this.server = null;
+		this.port = 2000;
 	}
 
 	//Start server
@@ -28,6 +29,7 @@ class ContactsServer {
 	//Init middleware
 	initMiddleware() {
 		this.server.use(express.json());
+		this.server.use(morgan('combined'));
 		this.server.use(cors({ origin: 'http://localhost:3000' }));
 	}
 
@@ -38,8 +40,8 @@ class ContactsServer {
 
 	//Start listening on port 2000
 	startListening() {
-		this.server.listen(process.env.PORT, () => {
-			console.log('Server started listening on port', process.env.PORT);
+		this.server.listen(this.port, () => {
+			console.log('Server started listening on port', this.port);
 		});
 	}
 }
